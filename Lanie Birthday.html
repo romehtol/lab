@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<!-- saved from url=(0079)file:///C:/Users/Admin/Downloads/full_screen_presentation_birthday_web_app.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Celebration - Full Screen Presentation</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="./Lanie Birthday_files/saved_resource"></script>
+    <!-- Canvas Confetti Library -->
+    <script src="./Lanie Birthday_files/confetti.browser.min.js.download"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="./Lanie Birthday_files/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./Lanie Birthday_files/css2" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                        cursive: ['Dancing Script', 'cursive'],
+                    },
+                    colors: {
+                        party: {
+                            pink: '#10B981', // Emerald green
+                            purple: '#059669', // Deep emerald
+                            yellow: '#A3E635', // Lime/Mint accent
+                            cyan: '#34D399', // Bright mint
+                            dark: '#022C22' // Dark forest green background
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Disable normal scrolling for slide presentation mode */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            background-color: #022c22;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Slide presentation container */
+        .slide-deck {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Slide layout & transitions */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.92) translateY(20px);
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        /* Festive Emerald & Mint Green Theme */
+        .theme-green {
+            background: radial-gradient(circle at center, #065f46 0%, #022c22 65%, #011913 100%);
+        }
+
+        /* Background Animated Particles Canvas */
+        #bgCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-box {
+            background: rgba(16, 185, 129, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 15px rgba(52, 211, 153, 0.8), 0 0 30px rgba(16, 185, 129, 0.5);
+        }
+
+        .glow-text-gold {
+            text-shadow: 0 0 15px rgba(163, 230, 53, 0.8), 0 0 30px rgba(163, 230, 53, 0.4);
+        }
+
+        /* Interactive Cake & Candles */
+        .cake-layer-top {
+            background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+            box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.15);
+        }
+        .cake-layer-bottom {
+            background: linear-gradient(180deg, #a3e635 0%, #10b981 100%);
+            box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .flame-anim {
+            animation: flicker 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+            50% { transform: scale(1.15, 0.9) rotate(2deg); opacity: 1; }
+            100% { transform: scale(0.95, 1.1) rotate(-1deg); opacity: 0.85; }
+        }
+
+        /* Unboxing Ribbon & Box */
+        .gift-wrapper {
+            perspective: 1000px;
+        }
+        .gift-box-main {
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .gift-lid-main {
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: top left;
+        }
+        .gift-box-opened .gift-lid-main {
+            transform: rotate(-120deg) translateY(-30px);
+        }
+
+        /* Interactive elements stop propagation helper */
+        .no-advance {
+            cursor: default;
+        }
+
+        /* Click prompt pulse animation */
+        @keyframes pulsePrompt {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-8px) scale(1.05); opacity: 1; }
+        }
+        .pulse-prompt {
+            animation: pulsePrompt 2s ease-in-out infinite;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Poppins, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.-right-10{right:-2.5rem}.-top-10{top:-2.5rem}.-top-6{top:-1.5rem}.left-0{left:0px}.right-0{right:0px}.top-0{top:0px}.z-10{z-index:10}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.mb-2{margin-bottom:0.5rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mb-\[-6px\]{margin-bottom:-6px}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.mb-1{margin-bottom:0.25rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.hidden{display:none}.h-1{height:0.25rem}.h-10{height:2.5rem}.h-14{height:3.5rem}.h-24{height:6rem}.h-28{height:7rem}.h-3{height:0.75rem}.h-32{height:8rem}.h-4{height:1rem}.h-40{height:10rem}.h-6{height:1.5rem}.h-64{height:16rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-full{height:100%}.h-12{height:3rem}.h-2{height:0.5rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-20{width:5rem}.w-24{width:6rem}.w-3\/4{width:75%}.w-36{width:9rem}.w-40{width:10rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-64{width:16rem}.w-7{width:1.75rem}.w-\[115\%\]{width:115%}.w-full{width:100%}.w-1{width:0.25rem}.w-2{width:0.5rem}.w-3\.5{width:0.875rem}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.max-w-lg{max-width:32rem}.max-w-md{max-width:28rem}.max-w-xl{max-width:36rem}@keyframes bounce{0%, 100%{transform:translateY(-25%);animation-timing-function:cubic-bezier(0.8,0,1,1)}50%{transform:none;animation-timing-function:cubic-bezier(0,0,0.2,1)}}.animate-bounce{animation:bounce 1s infinite}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-around{justify-content:space-around}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-b-full{border-bottom-right-radius:9999px;border-bottom-left-radius:9999px}.rounded-b-xl{border-bottom-right-radius:0.75rem;border-bottom-left-radius:0.75rem}.rounded-t-2xl{border-top-left-radius:1rem;border-top-right-radius:1rem}.rounded-t-3xl{border-top-left-radius:1.5rem;border-top-right-radius:1.5rem}.rounded-t-xl{border-top-left-radius:0.75rem;border-top-right-radius:0.75rem}.rounded-t-sm{border-top-left-radius:0.125rem;border-top-right-radius:0.125rem}.border{border-width:1px}.border-2{border-width:2px}.border-x{border-left-width:1px;border-right-width:1px}.border-b-2{border-bottom-width:2px}.border-b-4{border-bottom-width:4px}.border-b-8{border-bottom-width:8px}.border-t{border-top-width:1px}.border-emerald-300\/20{border-color:rgb(110 231 183 / 0.2)}.border-emerald-300\/30{border-color:rgb(110 231 183 / 0.3)}.border-emerald-300\/40{border-color:rgb(110 231 183 / 0.4)}.border-emerald-400{--tw-border-opacity:1;border-color:rgb(52 211 153 / var(--tw-border-opacity, 1))}.border-emerald-400\/20{border-color:rgb(52 211 153 / 0.2)}.border-emerald-400\/30{border-color:rgb(52 211 153 / 0.3)}.border-emerald-400\/40{border-color:rgb(52 211 153 / 0.4)}.border-emerald-500\/20{border-color:rgb(16 185 129 / 0.2)}.border-emerald-600{--tw-border-opacity:1;border-color:rgb(5 150 105 / var(--tw-border-opacity, 1))}.border-emerald-800{--tw-border-opacity:1;border-color:rgb(6 95 70 / var(--tw-border-opacity, 1))}.border-lime-400\/40{border-color:rgb(163 230 53 / 0.4)}.border-slate-900\/40{border-color:rgb(15 23 42 / 0.4)}.bg-emerald-100\/90{background-color:rgb(209 250 229 / 0.9)}.bg-emerald-200\/50{background-color:rgb(167 243 208 / 0.5)}.bg-emerald-500\/20{background-color:rgb(16 185 129 / 0.2)}.bg-emerald-950{--tw-bg-opacity:1;background-color:rgb(2 44 34 / var(--tw-bg-opacity, 1))}.bg-lime-300{--tw-bg-opacity:1;background-color:rgb(190 242 100 / var(--tw-bg-opacity, 1))}.bg-lime-400{--tw-bg-opacity:1;background-color:rgb(163 230 53 / var(--tw-bg-opacity, 1))}.bg-slate-950\/20{background-color:rgb(2 6 23 / 0.2)}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-emerald-500\/40{background-color:rgb(16 185 129 / 0.4)}.bg-white\/30{background-color:rgb(255 255 255 / 0.3)}.bg-white\/40{background-color:rgb(255 255 255 / 0.4)}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.bg-gradient-to-t{background-image:linear-gradient(to top, var(--tw-gradient-stops))}.from-emerald-100{--tw-gradient-from:#d1fae5 var(--tw-gradient-from-position);--tw-gradient-to:rgb(209 250 229 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-300{--tw-gradient-from:#6ee7b7 var(--tw-gradient-from-position);--tw-gradient-to:rgb(110 231 183 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-500{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-600{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-lime-200{--tw-gradient-from:#d9f99d var(--tw-gradient-from-position);--tw-gradient-to:rgb(217 249 157 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-200{--tw-gradient-from:#a7f3d0 var(--tw-gradient-from-position);--tw-gradient-to:rgb(167 243 208 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-yellow-500{--tw-gradient-from:#eab308 var(--tw-gradient-from-position);--tw-gradient-to:rgb(234 179 8 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-emerald-300{--tw-gradient-to:rgb(110 231 183 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #6ee7b7 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-teal-600{--tw-gradient-to:rgb(13 148 136 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #0d9488 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-white{--tw-gradient-to:rgb(255 255 255 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #fff var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-lime-300{--tw-gradient-to:rgb(190 242 100 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #bef264 var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-emerald-200{--tw-gradient-to:#a7f3d0 var(--tw-gradient-to-position)}.to-lime-300{--tw-gradient-to:#bef264 var(--tw-gradient-to-position)}.to-lime-400{--tw-gradient-to:#a3e635 var(--tw-gradient-to-position)}.to-lime-500{--tw-gradient-to:#84cc16 var(--tw-gradient-to-position)}.to-teal-200{--tw-gradient-to:#99f6e4 var(--tw-gradient-to-position)}.to-teal-600{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.to-teal-700{--tw-gradient-to:#0f766e var(--tw-gradient-to-position)}.to-white{--tw-gradient-to:#fff var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.p-1{padding:0.25rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.pb-2{padding-bottom:0.5rem}.pt-4{padding-top:1rem}.pt-6{padding-top:1.5rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.font-cursive{font-family:Dancing Script, cursive}.font-display{font-family:Fredoka, sans-serif}.font-sans{font-family:Poppins, sans-serif}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-6xl{font-size:3.75rem;line-height:1}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-emerald-100{--tw-text-opacity:1;color:rgb(209 250 229 / var(--tw-text-opacity, 1))}.text-emerald-100\/90{color:rgb(209 250 229 / 0.9)}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-emerald-50{--tw-text-opacity:1;color:rgb(236 253 245 / var(--tw-text-opacity, 1))}.text-lime-300{--tw-text-opacity:1;color:rgb(190 242 100 / var(--tw-text-opacity, 1))}.text-slate-800\/40{color:rgb(30 41 59 / 0.4)}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity, 1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.decoration-emerald-500{-webkit-text-decoration-color:#10b981;text-decoration-color:#10b981}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_12px_rgba\(163\2c 230\2c 53\2c 0\.9\)\]{--tw-shadow:0 0 12px rgba(163,230,53,0.9);--tw-shadow-colored:0 0 12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_8px_rgba\(52\2c 211\2c 153\2c 0\.8\)\]{--tw-shadow:0 0 8px rgba(52,211,153,0.8);--tw-shadow-colored:0 0 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.blur-3xl{--tw-blur:blur(64px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:scale-105:hover{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:scale-110:hover{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-emerald-500\/20:hover{background-color:rgb(16 185 129 / 0.2)}.hover\:bg-white\/20:hover{background-color:rgb(255 255 255 / 0.2)}.hover\:bg-white\/60:hover{background-color:rgb(255 255 255 / 0.6)}.hover\:from-emerald-600:hover{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-teal-700:hover{--tw-gradient-to:#0f766e var(--tw-gradient-to-position)}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:opacity-100{opacity:1}@media (min-width: 640px){.sm\:inline{display:inline}.sm\:w-72{width:18rem}.sm\:flex-row{flex-direction:row}.sm\:p-12{padding:3rem}.sm\:p-6{padding:1.5rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:text-6xl{font-size:3.75rem;line-height:1}.sm\:text-8xl{font-size:6rem;line-height:1}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}</style></head>
+<body class="theme-green" id="appBody" onclick="handleScreenClick(event)">
+
+    <!-- Background Particles Overlay Canvas -->
+    <canvas id="bgCanvas" width="1358" height="648"></canvas>
+
+    <!-- Floating Header & Audio Controls -->
+    <header class="fixed top-0 left-0 right-0 z-50 p-4 sm:p-6 flex items-center justify-between pointer-events-none">
+        
+        <!-- Center Progress Dots -->
+        <div class="pointer-events-auto glass-box px-4 py-2 rounded-full flex items-center gap-2 border border-emerald-400/20" id="dotsContainer"><button class="progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300"></button><button class="progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300"></button><button class="progress-dot w-6 h-2 rounded-full bg-emerald-400 transition-all duration-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></button><button class="progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300"></button><button class="progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300"></button><button class="progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300"></button><button class="progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300"></button></div>
+
+        <!-- Right: Audio Control Button -->
+        <div class="pointer-events-auto flex items-center gap-2">
+            <!-- Audio Music Toggle Button -->
+            <button onclick="toggleMusic(event)" id="musicToggleBtn" class="glass-box px-4 py-2.5 rounded-full hover:bg-emerald-500/20 transition duration-300 text-lime-300 flex items-center gap-2.5 shadow-lg active:scale-95" title="Toggle Music">
+                <i id="musicBtnIcon" class="fas fa-volume-up text-lime-300 animate-bounce"></i>
+                <span id="musicBtnText" class="text-xs font-semibold hidden sm:inline">Music Playing</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN SLIDE DECK PRESENTATION -->
+    <main class="slide-deck">
+
+        <!-- ================= SLIDE 1: WELCOME COVER ================= -->
+        <section class="slide" id="slide-1">
+            <div class="max-w-3xl text-center space-y-6">
+                <div class="inline-block px-5 py-2 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs sm:text-sm font-semibold tracking-wider uppercase animate-pulse">
+                    ✨ Tap Anywhere To Begin ✨
+                </div>
+                <h1 class="font-cursive text-6xl sm:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-mint-300 to-lime-300 glow-text leading-tight">
+                    Happy Birthday!
+                </h1>
+                <p class="font-display text-2xl sm:text-4xl text-lime-300 glow-text-gold">
+                    To <span class="recipient-name-target font-bold underline decoration-emerald-500">My Lab</span> 🎂
+                </p>
+                <p id="coverSubtitleTarget" class="text-sm sm:text-lg text-emerald-100/90 max-w-xl mx-auto font-light"> Happy Birthday to the one who holds my heart—thank you for making every day brighter and for being my favorite part of life. ❤️</p>
+
+                <div class="pt-8">
+                    <div class="pulse-prompt inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 via-teal-600 to-lime-500 text-white font-bold text-sm sm:text-base shadow-2xl border border-emerald-300/30 cursor-pointer">
+                        <span>Click / Tap Anywhere For Next Slide</span>
+                        <i class="fas fa-hand-pointer text-lime-300 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 2: PERSONALIZED LETTER CARD ================= -->
+        <section class="slide" id="slide-2">
+            <div class="max-w-2xl w-full glass-box p-8 sm:p-12 rounded-3xl border-2 border-emerald-400/30 text-center relative overflow-hidden shadow-2xl">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-2">A Special Letter For You</div>
+                <h2 class="font-cursive text-4xl sm:text-6xl text-lime-300 glow-text-gold mb-6">
+                    <span class="recipient-name-target">My Lab</span>,
+                </h2>
+
+                <div class="w-20 h-1 bg-gradient-to-r from-emerald-500 to-lime-400 mx-auto rounded-full mb-6"></div>
+
+                <p id="cardMessageTarget" class="text-base sm:text-xl text-emerald-50 italic leading-relaxed font-sans mb-8">"My love. Today is all about celebrating you—the most incredible, beautiful, and caring person I know. Words will never fully express how grateful I am to have you in my life, but I want to remind you today of just how deeply you are loved. You bring so much light, comfort, and happiness into my world, and even the simplest moments become special just because I’m sharing them with you. Thank you for your warmth, your kind heart, and for being my constant support through everything. I hope this birthday brings you as much pure joy as you give to everyone around you. ❤️✨"</p>
+
+                <div class="pt-4 border-t border-emerald-500/20 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs sm:text-sm text-emerald-200">
+                    <span id="cardAgeTarget" class="font-bold text-lime-300">Celebrating 25 Magical Years</span>
+                    <span id="cardSenderTarget" class="font-cursive text-xl text-lime-300">With Love ❤️</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 3: INTERACTIVE BIRTHDAY CAKE ================= -->
+        <section class="slide active" id="slide-3">
+            <div class="max-w-lg w-full text-center flex flex-col items-center">
+                <h2 class="font-display text-3xl sm:text-5xl text-lime-300 glow-text-gold mb-2">
+                    Make A Wish! 🕯️
+                </h2>
+                <p id="cakeInstructionText" class="text-xs sm:text-sm text-emerald-200 mb-6">✨ Happy Birthday! Wishes Sent To The Stars!</p>
+
+                <!-- Interactive Layered Cake -->
+                <div class="relative my-4 w-64 sm:w-72 h-64 flex flex-col items-center justify-end select-none no-advance">
+                    
+                    <!-- Candles Holder Container -->
+                    <div id="candlesContainer" class="relative z-30 flex justify-center items-end gap-4 mb-[-6px] w-full px-6"><div class="relative flex flex-col items-center cursor-pointer group no-advance">
+                    <div class="flame-elem block w-3.5 h-6 bg-gradient-to-t from-yellow-500 via-lime-300 to-white rounded-full flame-anim shadow-[0_0_12px_rgba(163,230,53,0.9)] mb-1 hidden"></div>
+                    <div class="smoke-elem w-1 h-4 bg-white/40 rounded-full animate-pulse mb-1"></div>
+                    <div class="w-3.5 h-12 bg-gradient-to-r from-emerald-200 via-white to-emerald-200 rounded-t-sm shadow-md border-x border-emerald-400/30 flex flex-col justify-between py-1">
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                    </div>
+                </div><div class="relative flex flex-col items-center cursor-pointer group no-advance">
+                    <div class="flame-elem block w-3.5 h-6 bg-gradient-to-t from-yellow-500 via-lime-300 to-white rounded-full flame-anim shadow-[0_0_12px_rgba(163,230,53,0.9)] mb-1 hidden"></div>
+                    <div class="smoke-elem w-1 h-4 bg-white/40 rounded-full animate-pulse mb-1"></div>
+                    <div class="w-3.5 h-12 bg-gradient-to-r from-emerald-200 via-white to-emerald-200 rounded-t-sm shadow-md border-x border-emerald-400/30 flex flex-col justify-between py-1">
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                    </div>
+                </div><div class="relative flex flex-col items-center cursor-pointer group no-advance">
+                    <div class="flame-elem block w-3.5 h-6 bg-gradient-to-t from-yellow-500 via-lime-300 to-white rounded-full flame-anim shadow-[0_0_12px_rgba(163,230,53,0.9)] mb-1 hidden"></div>
+                    <div class="smoke-elem w-1 h-4 bg-white/40 rounded-full animate-pulse mb-1"></div>
+                    <div class="w-3.5 h-12 bg-gradient-to-r from-emerald-200 via-white to-emerald-200 rounded-t-sm shadow-md border-x border-emerald-400/30 flex flex-col justify-between py-1">
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                    </div>
+                </div><div class="relative flex flex-col items-center cursor-pointer group no-advance">
+                    <div class="flame-elem block w-3.5 h-6 bg-gradient-to-t from-yellow-500 via-lime-300 to-white rounded-full flame-anim shadow-[0_0_12px_rgba(163,230,53,0.9)] mb-1 hidden"></div>
+                    <div class="smoke-elem w-1 h-4 bg-white/40 rounded-full animate-pulse mb-1"></div>
+                    <div class="w-3.5 h-12 bg-gradient-to-r from-emerald-200 via-white to-emerald-200 rounded-t-sm shadow-md border-x border-emerald-400/30 flex flex-col justify-between py-1">
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                    </div>
+                </div><div class="relative flex flex-col items-center cursor-pointer group no-advance">
+                    <div class="flame-elem block w-3.5 h-6 bg-gradient-to-t from-yellow-500 via-lime-300 to-white rounded-full flame-anim shadow-[0_0_12px_rgba(163,230,53,0.9)] mb-1 hidden"></div>
+                    <div class="smoke-elem w-1 h-4 bg-white/40 rounded-full animate-pulse mb-1"></div>
+                    <div class="w-3.5 h-12 bg-gradient-to-r from-emerald-200 via-white to-emerald-200 rounded-t-sm shadow-md border-x border-emerald-400/30 flex flex-col justify-between py-1">
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                    </div>
+                </div><div class="relative flex flex-col items-center cursor-pointer group no-advance">
+                    <div class="flame-elem block w-3.5 h-6 bg-gradient-to-t from-yellow-500 via-lime-300 to-white rounded-full flame-anim shadow-[0_0_12px_rgba(163,230,53,0.9)] mb-1 hidden"></div>
+                    <div class="smoke-elem w-1 h-4 bg-white/40 rounded-full animate-pulse mb-1"></div>
+                    <div class="w-3.5 h-12 bg-gradient-to-r from-emerald-200 via-white to-emerald-200 rounded-t-sm shadow-md border-x border-emerald-400/30 flex flex-col justify-between py-1">
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                    </div>
+                </div></div>
+
+                    <!-- Cake Top Tier -->
+                    <div class="cake-layer-top relative z-20 w-3/4 h-24 rounded-t-3xl border-b-4 border-emerald-300/40 flex flex-col justify-between overflow-hidden shadow-xl">
+                        <!-- Frosting drips -->
+                        <div class="w-full flex justify-around">
+                            <div class="w-6 h-7 bg-emerald-100/90 rounded-b-full"></div>
+                            <div class="w-7 h-9 bg-emerald-100/90 rounded-b-full"></div>
+                            <div class="w-5 h-6 bg-emerald-100/90 rounded-b-full"></div>
+                            <div class="w-7 h-8 bg-emerald-100/90 rounded-b-full"></div>
+                        </div>
+                        <div class="flex justify-around items-center px-4 pb-2 text-xs">
+                            <span>✨</span><span>⭐</span><span>✨</span><span>⭐</span>
+                        </div>
+                    </div>
+
+                    <!-- Cake Bottom Tier -->
+                    <div class="cake-layer-bottom relative z-10 w-full h-28 rounded-t-2xl border-b-8 border-slate-900/40 flex flex-col justify-between overflow-hidden shadow-2xl">
+                        <div class="w-full h-3 bg-emerald-200/50"></div>
+                        <div class="flex justify-around text-slate-800/40 font-bold text-xs">
+                            <span>❤️</span><span>🎉</span><span>❤️</span><span>🎉</span><span>❤️</span>
+                        </div>
+                        <div class="w-full h-4 bg-slate-950/20"></div>
+                    </div>
+
+                    <!-- Cake Stand Base -->
+                    <div class="w-[115%] h-6 bg-gradient-to-r from-emerald-100 via-white to-emerald-200 rounded-full shadow-2xl border-b-4 border-emerald-400"></div>
+                </div>
+
+                <!-- Interactive Blow Controls -->
+                <div class="mt-6 flex gap-3 no-advance">
+                    <button onclick="blowCandlesAction(event)" id="blowBtn" class="px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm shadow-xl hover:scale-105 active:scale-95 transition">
+                        💨 Blow Out Candles
+                    </button>
+                    <button onclick="relightCandlesAction(event)" id="relightBtn" class="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-emerald-300/20 text-xs font-semibold text-emerald-100 transition">
+                        🔥 Relight
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 4: UNWRAP THE GIFT ================= -->
+        <section class="slide" id="slide-4">
+            <div class="max-w-md w-full text-center flex flex-col items-center">
+                <h2 class="font-display text-3xl sm:text-5xl text-lime-300 glow-text-gold mb-2">
+                    Unwrap Your Gift! 🎁
+                </h2>
+                <p class="text-xs sm:text-sm text-emerald-200 mb-8">
+                    Tap the present to unbox your surprise greeting!
+                </p>
+
+                <!-- Unboxing Present Graphic -->
+                <div id="giftWrapperBox" onclick="openGiftBox(event)" class="gift-wrapper cursor-pointer no-advance my-4 flex flex-col items-center group">
+                    <div id="giftMain" class="gift-box-main relative">
+                        <!-- Gift Lid -->
+                        <div class="gift-lid-main w-36 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-t-xl shadow-xl border-b-2 border-emerald-800 flex justify-center items-center relative z-20">
+                            <div class="w-7 h-full bg-lime-300"></div>
+                            <!-- Bow tie -->
+                            <div class="absolute -top-6 w-12 h-6 bg-lime-400 rounded-full border-2 border-emerald-600 shadow-md"></div>
+                        </div>
+                        <!-- Gift Body -->
+                        <div class="w-36 h-32 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-b-xl shadow-2xl flex justify-center items-center relative z-10 overflow-hidden">
+                            <div class="w-7 h-full bg-lime-300"></div>
+                            <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition"></div>
+                        </div>
+                    </div>
+                    <span class="mt-6 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-xs text-lime-300 font-medium group-hover:bg-emerald-500 group-hover:text-white transition">
+                        Click Gift Box To Open 📦
+                    </span>
+                </div>
+
+                <!-- Unboxed Surprise Modal Box -->
+                <div id="giftCardSurprise" class="hidden glass-box p-6 rounded-2xl border border-lime-400/40 text-center animate-fade-in no-advance mt-4">
+                    <i class="fas fa-crown text-4xl text-lime-300 mb-2"></i>
+                    <h3 id="giftSurpriseTitle" class="font-display text-xl text-emerald-300">VIP Birthday Pass Activated!</h3>
+                    <p id="giftSurpriseMessage" class="text-xs text-emerald-100 mt-2">Entitles My Lab to infinite happiness, endless smiles, and all the birthday cake in the world!</p>
+                </div>
+            </div>
+        </section>
+
+      
+        <!-- ================= SLIDE 6: BIRTHDAY JUKEBOX ================= -->
+        <section class="slide" id="slide-6">
+            <div class="max-w-md w-full text-center flex flex-col items-center">
+                <h2 class="font-display text-3xl sm:text-5xl text-lime-300 glow-text-gold mb-2">
+                    Birthday Jukebox 🎵
+                </h2>
+                <p class="text-xs sm:text-sm text-emerald-200 mb-8">
+                    Turn up the volume and enjoy synthesized party notes!
+                </p>
+
+                <!-- Jukebox Visual Card -->
+                <div class="w-full glass-box p-8 rounded-3xl border border-emerald-400/30 flex flex-col items-center shadow-2xl no-advance">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-500 to-lime-400 p-1 animate-spin-slow mb-4 shadow-lg flex items-center justify-center">
+                        <div class="w-full h-full bg-emerald-950 rounded-full flex items-center justify-center border-2 border-emerald-400/30">
+                            <i id="jukeboxDiscIcon" class="fas fa-compact-disc text-4xl text-emerald-400"></i>
+                        </div>
+                    </div>
+
+                    <h3 id="jukeboxSongTitle" class="font-display text-lg text-white">Happy Birthday Celebration Melody</h3>
+                    <p id="jukeboxSongArtist" class="text-xs text-emerald-300 mt-1">Synthesized Web Audio Synth</p>
+
+                    <!-- Player controls -->
+                    <div class="mt-6 flex items-center gap-4">
+                        <button onclick="playJukeboxSong(event)" id="jukeboxPlayBtn" class="w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:scale-110 active:scale-95 text-white flex items-center justify-center shadow-xl transition">
+                            <i id="jukeboxPlayIcon" class="fas fa-pause text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 7: GRAND FINALE & PARTY ================= -->
+        <section class="slide" id="slide-7">
+            <div class="max-w-3xl w-full text-center space-y-6">
+                <div class="inline-block px-5 py-2 rounded-full bg-lime-400 text-slate-950 font-bold text-xs uppercase tracking-widest shadow-lg">
+                    🎉 Grand Celebration Finale
+                </div>
+
+                <h1 class="font-cursive text-6xl sm:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-lime-200 via-emerald-300 to-teal-200 glow-text leading-tight">
+                    Let's Party!
+                </h1>
+
+                <p class="font-display text-xl sm:text-3xl text-emerald-100">
+                    Wishing <span class="recipient-name-target font-bold text-lime-300">My Lab</span> the most fantastic year ever!
+                </p>
+
+                <div class="pt-6 flex flex-wrap justify-center gap-4 no-advance">
+                    <button onclick="triggerGrandConfetti(event)" class="px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm sm:text-base shadow-2xl hover:scale-105 active:scale-95 transition">
+                        🎉 Burst Party Confetti!
+                    </button>
+                    <button onclick="restartPresentation(event)" class="px-6 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-emerald-300/20 text-white font-bold text-sm sm:text-base transition">
+                        🔄 Replay Journey
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /* ==========================================================================
+           🎉 EDITABLE BIRTHDAY CONFIGURATION (EDIT DIRECTLY IN CODE BELOW) 🎉
+           ========================================================================== */
+        const BIRTHDAY_CONFIG = {
+            // Recipient Details
+            name: "My Lab",
+            age: 25,
+            
+            // Subtitle on Cover Slide 1
+            coverSubtitle: " Happy Birthday to the one who holds my heart—thank you for making every day brighter and for being my favorite part of life. ❤️",
+
+            // Personalized Wish Card on Slide 2
+            cardMessage: "My love. Today is all about celebrating you—the most incredible, beautiful, and caring person I know. Words will never fully express how grateful I am to have you in my life, but I want to remind you today of just how deeply you are loved. You bring so much light, comfort, and happiness into my world, and even the simplest moments become special just because I’m sharing them with you. Thank you for your warmth, your kind heart, and for being my constant support through everything. I hope this birthday brings you as much pure joy as you give to everyone around you. ❤️✨",
+            cardSender: "With Love ❤️",
+
+            // Unboxing Gift Surprise Voucher on Slide 4
+            giftSurpriseTitle: "VIP Birthday Pass Activated!",
+            giftSurpriseMessage: "Entitles My Lab to infinite happiness, endless smiles, and all the birthday cake in the world!",
+
+            
+
+            // Jukebox Details on Slide 6
+            songTitle: "Happy Birthday Celebration Melody",
+            songArtist: "Synthesized Web Audio Synth",
+
+            // Color Theme: 'theme-green'
+            theme: "theme-green"
+        };
+
+        /* ==========================================================================
+           LOGIC & INTERACTIVE PRESENTATION CONTROLLER
+           ========================================================================== */
+        let currentSlide = 1;
+        const totalSlides = 7;
+
+        let isCandlesBlown = false;
+        let isMusicPlaying = false;
+        let audioCtx = null;
+        let songTimeout = null;
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            renderProgressDots();
+            applyConfigToDOM();
+            initParticleCanvas();
+            updateSlideView();
+
+            // Attempt to start music automatically on page load
+            attemptAutoPlayMusic();
+
+            // Fallback for strict browser autoplay policies: trigger music on very first user click/touch
+            const firstInteractionHandler = () => {
+                if (!isMusicPlaying) {
+                    startMusic();
+                }
+                document.removeEventListener('click', firstInteractionHandler);
+                document.removeEventListener('touchstart', firstInteractionHandler);
+            };
+            document.addEventListener('click', firstInteractionHandler);
+            document.addEventListener('touchstart', firstInteractionHandler);
+
+            // Keyboard Navigation (Arrow keys & Spacebar)
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'Space') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+        });
+
+        // Attempt music auto-play immediately on load
+        function attemptAutoPlayMusic() {
+            setTimeout(() => {
+                if (!isMusicPlaying) {
+                    startMusic();
+                }
+            }, 300);
+        }
+
+        // Apply Configuration directly to the website
+        function applyConfigToDOM() {
+            document.getElementById('appBody').className = BIRTHDAY_CONFIG.theme || 'theme-green';
+
+            document.querySelectorAll('.recipient-name-target').forEach(el => {
+                el.innerText = BIRTHDAY_CONFIG.name;
+            });
+
+            const coverSub = document.getElementById('coverSubtitleTarget');
+            if (coverSub) coverSub.innerText = BIRTHDAY_CONFIG.coverSubtitle;
+
+            const cardMsg = document.getElementById('cardMessageTarget');
+            if (cardMsg) cardMsg.innerText = `"${BIRTHDAY_CONFIG.cardMessage}"`;
+
+            const cardAge = document.getElementById('cardAgeTarget');
+            if (cardAge) cardAge.innerText = `Celebrating ${BIRTHDAY_CONFIG.age} Magical Years`;
+
+            const cardSender = document.getElementById('cardSenderTarget');
+            if (cardSender) cardSender.innerText = BIRTHDAY_CONFIG.cardSender;
+
+            const giftTitle = document.getElementById('giftSurpriseTitle');
+            if (giftTitle) giftTitle.innerText = BIRTHDAY_CONFIG.giftSurpriseTitle;
+
+            const giftMsg = document.getElementById('giftSurpriseMessage');
+            if (giftMsg) giftMsg.innerText = BIRTHDAY_CONFIG.giftSurpriseMessage;
+
+            const jTitle = document.getElementById('jukeboxSongTitle');
+            if (jTitle) jTitle.innerText = BIRTHDAY_CONFIG.songTitle;
+
+            const jArtist = document.getElementById('jukeboxSongArtist');
+            if (jArtist) jArtist.innerText = BIRTHDAY_CONFIG.songArtist;
+
+            renderPhotoGallery();
+
+            const candleCount = Math.min(Math.max(parseInt(BIRTHDAY_CONFIG.age) || 3, 1), 6);
+            renderCandles(candleCount);
+        }
+
+        // Render Photo Gallery
+        function renderPhotoGallery() {
+            const container = document.getElementById('photoGalleryGrid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            BIRTHDAY_CONFIG.photos.forEach(photo => {
+                const card = document.createElement('div');
+                card.className = `bg-emerald-50 text-slate-900 p-3 pb-6 rounded-xl shadow-2xl transform ${photo.rotation || ''} hover:rotate-0 hover:scale-105 transition duration-300 border border-emerald-200`;
+                card.innerHTML = `
+                    <div class="w-full h-44 rounded-lg overflow-hidden bg-slate-200">
+                        <img src="${photo.url}" alt="${photo.caption}" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-cursive text-xl text-emerald-700 mt-3 font-bold">${photo.caption}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Click-To-Advance Handler (Single click changes slide)
+        function handleScreenClick(event) {
+            if (event.target.closest('.no-advance')) return;
+            nextSlide();
+        }
+
+        // Manual Slide Navigation Logic
+        function nextSlide(e) {
+            if (e) e.stopPropagation();
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+            } else {
+                currentSlide = 1;
+            }
+            updateSlideView();
+        }
+
+        function prevSlide(e) {
+            if (e) e.stopPropagation();
+            if (currentSlide > 1) {
+                currentSlide--;
+            } else {
+                currentSlide = totalSlides;
+            }
+            updateSlideView();
+        }
+
+        function goToSlide(index, e) {
+            if (e) e.stopPropagation();
+            currentSlide = index;
+            updateSlideView();
+        }
+
+        function restartPresentation(e) {
+            if (e) e.stopPropagation();
+            currentSlide = 1;
+            updateSlideView();
+        }
+
+        function updateSlideView() {
+            document.querySelectorAll('.slide').forEach((slide, idx) => {
+                if (idx + 1 === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            document.querySelectorAll('.progress-dot').forEach((dot, idx) => {
+                if (idx + 1 === currentSlide) {
+                    dot.className = "progress-dot w-6 h-2 rounded-full bg-emerald-400 transition-all duration-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]";
+                } else {
+                    dot.className = "progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300";
+                }
+            });
+
+            if (currentSlide === 7) {
+                triggerGrandConfetti();
+            }
+        }
+
+        function renderProgressDots() {
+            const container = document.getElementById('dotsContainer');
+            container.innerHTML = '';
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.onclick = (e) => goToSlide(i, e);
+                dot.className = i === 1 ? "progress-dot w-6 h-2 rounded-full bg-emerald-400 transition-all duration-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : "progress-dot w-2 h-2 rounded-full bg-white/30 hover:bg-white/60 transition-all duration-300";
+                container.appendChild(dot);
+            }
+        }
+
+        // Render Cake Candles
+        function renderCandles(count) {
+            const container = document.getElementById('candlesContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const candle = document.createElement('div');
+                candle.className = 'relative flex flex-col items-center cursor-pointer group no-advance';
+                candle.onclick = blowCandlesAction;
+
+                const flameClass = isCandlesBlown ? 'hidden' : 'block';
+                const smokeClass = isCandlesBlown ? 'block' : 'hidden';
+
+                candle.innerHTML = `
+                    <div class="flame-elem ${flameClass} w-3.5 h-6 bg-gradient-to-t from-yellow-500 via-lime-300 to-white rounded-full flame-anim shadow-[0_0_12px_rgba(163,230,53,0.9)] mb-1"></div>
+                    <div class="smoke-elem ${smokeClass} w-1 h-4 bg-white/40 rounded-full animate-pulse mb-1"></div>
+                    <div class="w-3.5 h-12 bg-gradient-to-r from-emerald-200 via-white to-emerald-200 rounded-t-sm shadow-md border-x border-emerald-400/30 flex flex-col justify-between py-1">
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                        <span class="w-full h-1 bg-emerald-500/40"></span>
+                    </div>
+                `;
+                container.appendChild(candle);
+            }
+        }
+
+        // Blow Out Candles Action
+        function blowCandlesAction(e) {
+            if (e) e.stopPropagation();
+            if (isCandlesBlown) return;
+
+            isCandlesBlown = true;
+            document.querySelectorAll('.flame-elem').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.smoke-elem').forEach(el => el.classList.remove('hidden'));
+
+            triggerGrandConfetti();
+            playBlowSynthSound();
+
+            document.getElementById('cakeInstructionText').innerText = "✨ Happy Birthday! Wishes Sent To The Stars!";
+        }
+
+        function relightCandlesAction(e) {
+            if (e) e.stopPropagation();
+            isCandlesBlown = false;
+            document.querySelectorAll('.flame-elem').forEach(el => el.classList.remove('hidden'));
+            document.querySelectorAll('.smoke-elem').forEach(el => el.classList.add('hidden'));
+            document.getElementById('cakeInstructionText').innerText = "Click directly on the candles or tap the button to blow them out!";
+        }
+
+        // Open Gift Box Action
+        function openGiftBox(e) {
+            if (e) e.stopPropagation();
+            const giftBox = document.getElementById('giftWrapperBox');
+            const surprise = document.getElementById('giftCardSurprise');
+
+            giftBox.classList.add('gift-box-opened');
+            triggerGrandConfetti();
+
+            setTimeout(() => {
+                surprise.classList.remove('hidden');
+            }, 300);
+        }
+
+        // Web Audio Synthesizer Engine - Auto Playing Background Music
+        function toggleMusic(e) {
+            if (e) e.stopPropagation();
+            if (isMusicPlaying) {
+                stopMusic();
+            } else {
+                startMusic();
+            }
+        }
+
+        function playJukeboxSong(e) {
+            if (e) e.stopPropagation();
+            toggleMusic(e);
+        }
+
+        function startMusic() {
+            isMusicPlaying = true;
+            const btnIcon = document.getElementById('musicBtnIcon');
+            const btnText = document.getElementById('musicBtnText');
+            if (btnIcon) btnIcon.className = "fas fa-volume-up text-lime-300 animate-bounce";
+            if (btnText) btnText.innerText = "Music Playing";
+            
+            const jukeboxIcon = document.getElementById('jukeboxPlayIcon');
+            if (jukeboxIcon) jukeboxIcon.className = "fas fa-pause text-xl";
+
+            playHappyBirthdayMelody();
+        }
+
+        function stopMusic() {
+            isMusicPlaying = false;
+            clearTimeout(songTimeout);
+            const btnIcon = document.getElementById('musicBtnIcon');
+            const btnText = document.getElementById('musicBtnText');
+            if (btnIcon) btnIcon.className = "fas fa-volume-mute text-emerald-300";
+            if (btnText) btnText.innerText = "Music Muted";
+            
+            const jukeboxIcon = document.getElementById('jukeboxPlayIcon');
+            if (jukeboxIcon) jukeboxIcon.className = "fas fa-play text-xl ml-0.5";
+        }
+
+        function playHappyBirthdayMelody() {
+            if (!isMusicPlaying) return;
+
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const notes = {
+                    'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
+                    'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25
+                };
+
+                const song = [
+                    ['C4', 0.4], ['C4', 0.4], ['D4', 0.8], ['C4', 0.8], ['F4', 0.8], ['E4', 1.2],
+                    ['C4', 0.4], ['C4', 0.4], ['D4', 0.8], ['C4', 0.8], ['G4', 0.8], ['F4', 1.2],
+                    ['C4', 0.4], ['C4', 0.4], ['C5', 0.8], ['A4', 0.8], ['F4', 0.8], ['E4', 0.8], ['D4', 0.8],
+                    ['B4', 0.4], ['B4', 0.4], ['A4', 0.8], ['F4', 0.8], ['G4', 0.8], ['F4', 1.2]
+                ];
+
+                let idx = 0;
+
+                function step() {
+                    if (!isMusicPlaying) return;
+
+                    const [note, duration] = song[idx];
+                    const freq = notes[note];
+
+                    if (freq) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (duration * 0.45));
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + (duration * 0.45));
+                    }
+
+                    idx = (idx + 1) % song.length;
+                    songTimeout = setTimeout(step, duration * 450);
+                }
+
+                step();
+            } catch (err) {
+                console.log("Audio waiting for user interaction.");
+            }
+        }
+
+        function playBlowSynthSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.8);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch(e){}
+        }
+
+        // Confetti Fireworks Burst - Emerald, Lime, Mint & Gold
+        function triggerGrandConfetti(e) {
+            if (e) e.stopPropagation();
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 110,
+                    spread: 85,
+                    origin: { y: 0.6 },
+                    colors: ['#10B981', '#34D399', '#A3E635', '#6EE7B7', '#FFD700', '#ffffff']
+                });
+            }
+        }
+
+        // Background Floating Particle Animation
+        function initParticleCanvas() {
+            const canvas = document.getElementById('bgCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = [];
+            const colors = ['#10B981', '#34D399', '#A3E635', '#6EE7B7', '#059669'];
+
+            for (let i = 0; i < 35; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 3 + 1,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: -Math.random() * 0.8 - 0.2
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.y < -10) p.y = canvas.height + 10;
+                    if (p.x < -10) p.x = canvas.width + 10;
+                    if (p.x > canvas.width + 10) p.x = -10;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = 0.45;
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+    </script>
+
+</body></html>
